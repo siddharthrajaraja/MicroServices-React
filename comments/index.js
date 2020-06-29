@@ -1,39 +1,47 @@
-// require imports ------------------------
-const express =require('express')
-const bodyParser =require('body-parser')
-var cors=require('cors')
-const {randomBytes}=require('crypto')
+const express = require('express');
+const bodyParser = require('body-parser');
+const { randomBytes } = require('crypto');
+const cors = require('cors');
+const axios = require('axios');
 
-const app=express()
-
-// Middle-wares ------------------------>>> 
-app.use(bodyParser.json())
+const app = express();
+app.use(bodyParser.json());
 app.use(cors());
-// ----------------------------------------
 
-// GET ROUTES ----------------------------
-const commentByPostID={}
+const commentsByPostId = {};
 
-app.get('/posts/:id/comments',(req,res)=>{
-        res.send(commentByPostID[req.params.id] || [])
-})
-//-----------------------------------------
+app.get('/posts/:id/comments', (req, res) => {
+  res.send(commentsByPostId[req.params.id] || []);
+});
 
-// Post Routes  ----------------------------
-app.post('/posts/:id/comments',(req,res)=>{
-    const commentID=randomBytes(4).toString('hex')
-    const {content}=req.body
+app.post('/posts/:id/comments', async (req, res) => {
+  const commentId = randomBytes(4).toString('hex');
+  const { content } = req.body;
 
-    const comments=commentByPostID[req.params.id] || []
-    
-    comments.push({id:commentID,content})
+  const comments = commentsByPostId[req.params.id] || [];
 
-    commentByPostID[req.params.id]=comments
+  comments.push({ id: commentId, content });
 
-    res.status(201).send(comments)
-})
+  commentsByPostId[req.params.id] = comments;
 
-// Server Listening !! ----------------------
-app.listen(process.env.PORT || 4001,()=>{
-    console.log("COMMMENTS SERVICE 4001")
-})
+  await axios.post('http://localhost:4005/events', {
+    type: 'CommentCreated',
+    data: {
+      id: commentId,
+      content,
+      postId: req.params.id
+    }
+  });
+
+  res.status(201).send(comments);
+});
+
+app.post('/events', (req, res) => {
+  console.log('Event Received:', req.body.type);
+
+  res.send({});
+});
+
+app.listen(4001, () => {
+  console.log('Listening on 4001');
+});
