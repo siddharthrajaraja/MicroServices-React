@@ -1,0 +1,18 @@
+# This file creates a Deployment object in K8s cluster (production)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: posts-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: posts
+  template:
+    metadata:
+      labels: 
+        app: posts
+    spec:
+      containers:
+        - name: posts
+          image: 7906861671/posts

@@ -1,0 +1,9 @@
+# This is used in testing
+apiVersion: v1
+kind: Pod
+metadata:
+  name: posts
+spec:
+  containers:
+    - name: posts
+      image: siddharth/posts:0.0.1
