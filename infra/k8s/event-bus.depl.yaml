@@ -1,0 +1,18 @@
+# This file creates a Deployment object in K8s cluster (production)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: event-bus-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: event-bus
+  template:
+    metadata:
+      labels: 
+        app: event-bus
+    spec:
+      containers:
+        - name: event-bus
+          image: 7906861671/event-bus
